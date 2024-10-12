@@ -1,11 +1,10 @@
 import random
-import socket
 import sys
-import threading
+import zipfile
 from PySide6 import QtWidgets, QtGui, QtCore
 import os
 import ctypes
-import wget
+import requests
 
 ########################################################################################################################
 
@@ -52,11 +51,21 @@ import wget
 
 ########################################################################################################################
 
-if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
-    os.makedirs(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Fonts")
-    os.makedirs(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Images")
-    wget.download("https://mega.nz/file/yRpBQZSI#b_xTM85mjawfuNrLbXzTgqCFg5jAYJR7VSo__toX7Ow", f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Fonts")
+def fajltorles():
+    if os.path.exists("myDiscord.zip"):
+        os.remove("myDiscord.zip")
 
+if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
+    r = requests.get("https://c4227fda-4573-4d08-bf3b-07835e0f2723.filesusr.com/archives/f7dbe2_3d979411e5f445b48c5554e7b12ce4be.zip?dn=myDiscord.zip")
+    f = open("myDiscord.zip", "wb")
+    f.write(r.content)
+    try:
+        with zipfile.ZipFile("myDiscord.zip", "r") as zip_ref:
+            zip_ref.extractall(f"C:/Users/{os.getlogin()}/Appdata/Roaming")
+            ctypes.windll.user32.MessageBoxW(0, "A myDiscordhoz szükséges fájlok letöltődtek!\nKérlek nyisd meg újra a myDiscordot! (myDiscord.exe)", "Visszajelzés")
+            fajltorles()
+    except zipfile.BadZipfile:
+        ctypes.windll.user32.MessageBoxW(0, "Nem sikerült letölteni a myDiscordhoz szükséges fájlokat", "Hiba")
 
 class Bejelentkezes(QtWidgets.QWidget):
     def __init__(self):
