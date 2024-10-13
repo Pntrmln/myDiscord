@@ -55,25 +55,31 @@ def fajltorles():
     if os.path.exists("myDiscord.zip"):
         os.remove("myDiscord.zip")
 
+def unzip():
+    try:
+        with zipfile.ZipFile("myDiscord.zip", "r") as zip_ref:
+            zip_ref.extractall(f"C:/Users/{os.getlogin()}/Appdata/Roaming")
+            ctypes.windll.user32.MessageBoxW(0, "A myDiscordhoz szükséges fájlok letöltődtek!\nKérlek nyisd meg újra a myDiscordot! (myDiscord.exe)", "Visszajelzés")
+    except zipfile.BadZipfile:
+        ctypes.windll.user32.MessageBoxW(0, "Nem sikerült letölteni a myDiscordhoz szükséges fájlokat", "Hiba")
 
 if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
     r = requests.get("https://c4227fda-4573-4d08-bf3b-07835e0f2723.filesusr.com/archives"
                      "/f7dbe2_3d979411e5f445b48c5554e7b12ce4be.zip?dn=myDiscord.zip")
     f = open("myDiscord.zip", "wb")
     f.write(r.content)
-    try:
-        with zipfile.ZipFile("myDiscord.zip", "r") as zip_ref:
-            zip_ref.extractall(f"C:/Users/{os.getlogin()}/Appdata/Roaming")
-            ctypes.windll.user32.MessageBoxW(0, "A myDiscordhoz szükséges fájlok letöltődtek!\nKérlek nyisd meg újra a myDiscordot! (myDiscord.exe)", "Visszajelzés")
-            fajltorles()
-    except zipfile.BadZipfile:
-        ctypes.windll.user32.MessageBoxW(0, "Nem sikerült letölteni a myDiscordhoz szükséges fájlokat", "Hiba")
+    f.close()
+    unzip()
+    fajltorles()
 
 
 class Main(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.setStyleSheet("background-color: #292929")
+
+        self.resize(ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1))
 
 class Bejelentkezes(QtWidgets.QWidget):
 
@@ -253,6 +259,8 @@ class Regisztracio(QtWidgets.QWidget):
                 f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt", "w")
                 f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                 f.close()
+                self.regfeedbacklbl.setText("Sikeres regisztráció!")
+                self.elrendezes.addWidget(self.regfeedbacklbl)
         else:
             for x in range(mappakszama):
                 if x < 10:
@@ -431,7 +439,7 @@ class Fooldal(QtWidgets.QWidget):
         self.bejelentkezes_gomb.clicked.connect(self.loginablak)
         self.bejelentkezes_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
 
-        self.verzio = QtWidgets.QLabel("v.a.0.0.2")
+        self.verzio = QtWidgets.QLabel("v.a.0.0.3")
         self.verzio.setStyleSheet("color: white; margin-top: 125px")
         self.verzio.setFont(QtGui.QFont(betutipus_csalad[0], 10))
         self.verzio.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
