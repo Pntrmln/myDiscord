@@ -5,8 +5,8 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import os
 import ctypes
 import requests
-
-########################################################################################################################
+import socket
+import threading
 
 # # Funkció az üzenetek fogadására a szervertől
 # def receive_messages(client_socket):
@@ -74,12 +74,52 @@ if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
 
 
 class Main(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+
+    def kuldes(self):
+        uzenet = QtWidgets.QLabel()
+        uzenet.setText(f"{user}: {self.uzenetinput.text()}")
+        uzenet.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        uzenet.setStyleSheet("color: white")
+        uzenet.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.uzenetek.addWidget(uzenet)
+
+    def __init__(self):             # Az üzenetek görgethetővé tétele!!!
+        super().__init__()          # Újra eltűnik az inputmező! -> javítás!
 
         self.setStyleSheet("background-color: #292929")
 
         self.resize(ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1))
+
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout2 = QtWidgets.QHBoxLayout()
+
+        self.resztvevok = QtWidgets.QLabel("A beszélgetésben résztvevők:")
+        self.resztvevok.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        self.resztvevok.setStyleSheet("QLabel{color: white; margin-bottom: 100px}")
+        self.resztvevok.setFont(QtGui.QFont(betutipus_csalad[0], 16))
+
+        self.uzenetinput = QtWidgets.QLineEdit()
+        self.uzenetinput.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
+        self.uzenetinput.setStyleSheet("color: white")
+        self.uzenetinput.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.uzenetinput.setPlaceholderText("Írd be az üzenetet...")
+
+        self.uzenetkuldes = QtWidgets.QPushButton("Küldés")
+        self.uzenetkuldes.setStyleSheet("QPushButton{background-color: white;} QPushButton:hover{background-color: red}")
+        self.uzenetkuldes.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.uzenetkuldes.clicked.connect(self.kuldes)
+
+        self.uzenetek = QtWidgets.QVBoxLayout()
+        QtWidgets.QScrollArea(self)
+
+        self.layout.addWidget(self.resztvevok)
+        self.layout.addLayout(self.uzenetek)
+        self.layout.addLayout(self.layout2)
+        self.layout2.addWidget(self.uzenetinput)
+        self.layout2.addWidget(self.uzenetkuldes)
+
+        self.show()
+
 
 class Bejelentkezes(QtWidgets.QWidget):
 
@@ -89,7 +129,7 @@ class Bejelentkezes(QtWidgets.QWidget):
         self.m.show()
 
     def adatcheck(self):
-
+        global user
         beirt_fhnev = self.fhnevinput2.text()
         beirt_jszo = self.jszoinput2.text()
 
@@ -122,10 +162,12 @@ class Bejelentkezes(QtWidgets.QWidget):
             rpword = pword[::-1]
             rpword = rpword.replace("\n", "")
             if runame == beirt_fhnev and rpword == beirt_jszo:
+                user = beirt_fhnev
                 self.foablak()
                 self.loginfeedbacklbl.setText("Sikeres bejelentkezés!")
                 self.elrendezes.addWidget(self.loginfeedbacklbl)
                 sikeres = True
+                self.close()
             else:
                 if not sikeres:
                     self.loginfeedbacklbl.setText("Sikertelen bejelentkezés!\nA felhasználónév vagy a jelszó nem egyezik!")
