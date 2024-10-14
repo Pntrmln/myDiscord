@@ -481,7 +481,7 @@ class Fooldal(QtWidgets.QWidget):
         self.bejelentkezes_gomb.clicked.connect(self.loginablak)
         self.bejelentkezes_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
 
-        self.verzio = QtWidgets.QLabel("v.a.0.0.3")
+        self.verzio = QtWidgets.QLabel("v.a.1.0.0")
         self.verzio.setStyleSheet("color: white; margin-top: 125px")
         self.verzio.setFont(QtGui.QFont(betutipus_csalad[0], 10))
         self.verzio.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
