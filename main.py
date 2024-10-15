@@ -5,51 +5,7 @@ from PySide6 import QtWidgets, QtGui, QtCore
 import os
 import ctypes
 import requests
-import socket
-import threading
-
-# # Funkció az üzenetek fogadására a szervertől
-# def receive_messages(client_socket):
-#     while True:
-#         try:
-#             message = client_socket.recv(1024).decode('utf-8')
-#             if not message:
-#                 break
-#             print(f"\nBarátod: {message}")
-#         except:
-#             break
-#
-#
-# # Kliens indítása
-# def start_client():
-#     host = '188.36.17.24'  # Szerver IP címe
-#     port = 9600  # Szerver portja
-#
-#     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     client_socket.connect((host, port))
-#
-#     print(f"Kapcsolódva a szerverhez: {host}:{port}")
-#
-#     # Üzenetek fogadására külön szálat indítunk
-#     receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
-#     receive_thread.start()
-#
-#     # Üzenetek küldése a szervernek
-#     while True:
-#         message = input("Te: ")
-#         if message.lower() in ['exit', 'kilépés']:
-#             print("Kilépés...")
-#             client_socket.send(message.encode('utf-8'))
-#             break
-#         client_socket.send(message.encode('utf-8'))
-#
-#     client_socket.close()
-#
-#
-# start_client()
-
-
-########################################################################################################################
+from datetime import datetime
 
 def fajltorles():
     if os.path.exists("myDiscord.zip"):
@@ -72,54 +28,78 @@ if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
     unzip()
     fajltorles()
 
+skiplogin = False
 
 class Main(QtWidgets.QWidget):
 
     def kuldes(self):
+        now = datetime.now()
+        dt_string = now.strftime("%Y.%m.%d. %H:%M:%S")
         uzenet = QtWidgets.QLabel()
-        uzenet.setText(f"{user}: {self.uzenetinput.text()}")
+        uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
         uzenet.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         uzenet.setStyleSheet("color: white")
         uzenet.setFont(QtGui.QFont(betutipus_csalad[0], 12))
-        self.uzenetek.addWidget(uzenet)
+        self.uzenetlyt.addWidget(uzenet)
+        self.uzenetinput.setText("")
 
-    def __init__(self):             # Az üzenetek görgethetővé tétele!!!
-        super().__init__()          # Újra eltűnik az inputmező! -> javítás!
+
+    def __init__(self):
+        super().__init__()
+
+        scroll_area = QtWidgets.QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+
+        central_widget = QtWidgets.QWidget()
+        central_widget.setStyleSheet("background-color: #292929")
+        scroll_area.setWidget(central_widget)
 
         self.setStyleSheet("background-color: #292929")
-
         self.resize(ctypes.windll.user32.GetSystemMetrics(0), ctypes.windll.user32.GetSystemMetrics(1))
 
-        self.layout = QtWidgets.QVBoxLayout(self)
-        self.layout2 = QtWidgets.QHBoxLayout()
+        self.uzenetlyt = QtWidgets.QVBoxLayout(central_widget)
+        self.uzenetlyt.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
 
-        self.resztvevok = QtWidgets.QLabel("A beszélgetésben résztvevők:")
-        self.resztvevok.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
-        self.resztvevok.setStyleSheet("QLabel{color: white; margin-bottom: 100px}")
-        self.resztvevok.setFont(QtGui.QFont(betutipus_csalad[0], 16))
+        self.left_layout = QtWidgets.QVBoxLayout()
+        self.left_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+
+        for i in range(3):
+            btn = QtWidgets.QPushButton(f"Option {i + 1}")
+            btn.setStyleSheet("color: white; background-color: #444444;")
+            self.left_layout.addWidget(btn)
+
+        self.hbox_main = QtWidgets.QHBoxLayout()
+
+        right_layout = QtWidgets.QVBoxLayout()
+
+        right_layout.addWidget(scroll_area)
 
         self.uzenetinput = QtWidgets.QLineEdit()
-        self.uzenetinput.setAlignment(QtCore.Qt.AlignmentFlag.AlignBottom)
-        self.uzenetinput.setStyleSheet("color: white")
-        self.uzenetinput.setFont(QtGui.QFont(betutipus_csalad[0], 12))
         self.uzenetinput.setPlaceholderText("Írd be az üzenetet...")
+        self.uzenetinput.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.uzenetinput.setStyleSheet("color: white")
 
-        self.uzenetkuldes = QtWidgets.QPushButton("Küldés")
-        self.uzenetkuldes.setStyleSheet("QPushButton{background-color: white;} QPushButton:hover{background-color: red}")
-        self.uzenetkuldes.setFont(QtGui.QFont(betutipus_csalad[0], 12))
-        self.uzenetkuldes.clicked.connect(self.kuldes)
+        self.kuldesgomb = QtWidgets.QPushButton("Küldés")
+        self.kuldesgomb.setStyleSheet("QPushButton{background-color: white;} QPushButton:hover{background-color: red}")
+        self.kuldesgomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.kuldesgomb.clicked.connect(self.kuldes)
 
-        self.uzenetek = QtWidgets.QVBoxLayout()
-        QtWidgets.QScrollArea(self)
+        self.hbox_input = QtWidgets.QHBoxLayout()
+        self.hbox_input.addWidget(self.uzenetinput)
+        self.hbox_input.addWidget(self.kuldesgomb)
 
-        self.layout.addWidget(self.resztvevok)
-        self.layout.addLayout(self.uzenetek)
-        self.layout.addLayout(self.layout2)
-        self.layout2.addWidget(self.uzenetinput)
-        self.layout2.addWidget(self.uzenetkuldes)
+        right_layout.addLayout(self.hbox_input)
 
+        self.hbox_main.addLayout(self.left_layout)
+        self.hbox_main.addLayout(right_layout)
+
+        self.main_layout = QtWidgets.QVBoxLayout(self)
+        self.main_layout.addLayout(self.hbox_main)
+
+        self.setLayout(self.main_layout)
+        self.setWindowTitle("myDiscord")
         self.show()
-
 
 class Bejelentkezes(QtWidgets.QWidget):
 
@@ -129,6 +109,17 @@ class Bejelentkezes(QtWidgets.QWidget):
         self.m.show()
 
     def adatcheck(self):
+        global xn
+
+        if self.checkbox.isChecked():
+            global skiplogin
+            skiplogin = True
+
+            os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt"), exist_ok=True)
+            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "w")
+            f.write(f"skiplogin: 1")
+            f.close()
+
         global user
         beirt_fhnev = self.fhnevinput2.text()
         beirt_jszo = self.jszoinput2.text()
@@ -136,6 +127,7 @@ class Bejelentkezes(QtWidgets.QWidget):
         sikeres = False
 
         mappakszama = (len(next(os.walk(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users"))[1]))
+
 
         for x in range(mappakszama):
             fj = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{x}/userdata.txt", "r")
@@ -162,6 +154,7 @@ class Bejelentkezes(QtWidgets.QWidget):
             rpword = pword[::-1]
             rpword = rpword.replace("\n", "")
             if runame == beirt_fhnev and rpword == beirt_jszo:
+                xn = x
                 user = beirt_fhnev
                 self.foablak()
                 self.loginfeedbacklbl.setText("Sikeres bejelentkezés!")
@@ -220,6 +213,12 @@ class Bejelentkezes(QtWidgets.QWidget):
         self.logingomb.setFixedWidth(150)
         self.logingomb.clicked.connect(self.adatcheck)
 
+        self.skloginlbl = QtWidgets.QLabel("Bejelentkezve maradok")
+        self.skloginlbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.skloginlbl.setFont(QtGui.QFont(betutipus_csalad[0], 10))
+        self.skloginlbl.setStyleSheet("color: white")
+        self.checkbox = QtWidgets.QCheckBox()
+
         self.elrendezes.addWidget(self.logolabel)
         self.elrendezes.addWidget(self.reglabel)
         self.elrendezes.addWidget(self.fhnevlabel)
@@ -233,6 +232,11 @@ class Bejelentkezes(QtWidgets.QWidget):
         self.layout3.addWidget(self.jszoinput2)
         self.elrendezes.addLayout(self.layout4)
         self.layout4.addWidget(self.logingomb)
+        self.layout5 = QtWidgets.QHBoxLayout()
+        self.layout5.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.elrendezes.addLayout(self.layout5)
+        self.layout5.addWidget(self.skloginlbl)
+        self.layout5.addWidget(self.checkbox)
 
         self.loginfeedbacklbl = QtWidgets.QLabel("")
         self.loginfeedbacklbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -432,9 +436,19 @@ class Fooldal(QtWidgets.QWidget):
         if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users"):
             ctypes.windll.user32.MessageBoxW(0, "Nem található regisztrált felhasználó erről az eszközről!", "Hiba")
         else:
-            if self.y is None:
-                self.y = Bejelentkezes()
-            self.y.show()
+            if not skiplogin:
+                if self.y is None:
+                    self.y = Bejelentkezes()
+                self.y.show()
+            else:
+                if self.m is None:
+                    self.m = Main()
+                self.m.show()
+
+    def mainablak(self):
+        if self.m is None:
+            self.m = Main()
+        self.m.show()
 
     def regablak(self):
         if self.w is None:
@@ -448,6 +462,8 @@ class Fooldal(QtWidgets.QWidget):
         self.w = None
 
         self.y = None
+
+        self.m = None
 
         self.setStyleSheet("background-color: #292929")
 
@@ -481,7 +497,7 @@ class Fooldal(QtWidgets.QWidget):
         self.bejelentkezes_gomb.clicked.connect(self.loginablak)
         self.bejelentkezes_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
 
-        self.verzio = QtWidgets.QLabel("v.a.1.0.0")
+        self.verzio = QtWidgets.QLabel("v.a.1.1.0")
         self.verzio.setStyleSheet("color: white; margin-top: 125px")
         self.verzio.setFont(QtGui.QFont(betutipus_csalad[0], 10))
         self.verzio.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -498,6 +514,13 @@ class Fooldal(QtWidgets.QWidget):
         self.layout2.addWidget(self.bejelentkezes_gomb)
         self.layout.addWidget(self.verzio)
 
+        f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "r")
+        sorok = f.readlines()
+        print(sorok[0])
+        sorok[0] = sorok[0].replace("\n", "")
+
+        if str(sorok[0]) == "skiplogin: 1":
+            self.mainablak()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
