@@ -304,14 +304,14 @@ class Regisztracio(QtWidgets.QWidget):
                             f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt", "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
-                            self.regfeedbacklbl.setText("Sikeres regisztráció!")
+                            self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
                             self.elrendezes.addWidget(self.regfeedbacklbl)
             else:
                 os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt"), exist_ok=True)
                 f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt", "w")
                 f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                 f.close()
-                self.regfeedbacklbl.setText("Sikeres regisztráció!")
+                self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
                 self.elrendezes.addWidget(self.regfeedbacklbl)
         else:
             for x in range(mappakszama):
@@ -339,7 +339,7 @@ class Regisztracio(QtWidgets.QWidget):
                             f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt", "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
-                            self.regfeedbacklbl.setText("Sikeres regisztráció!")
+                            self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
                             self.elrendezes.addWidget(self.regfeedbacklbl)
                 elif x >= 10:
                     f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{x}/userdata.txt", "r")
@@ -365,7 +365,7 @@ class Regisztracio(QtWidgets.QWidget):
                             f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt", "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
-                            self.regfeedbacklbl.setText("Sikeres regisztráció!")
+                            self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
                             self.elrendezes.addWidget(self.regfeedbacklbl)
 
     def __init__(self):
