@@ -15,7 +15,6 @@ def unzip():
     try:
         with zipfile.ZipFile("myDiscord.zip", "r") as zip_ref:
             zip_ref.extractall(f"C:/Users/{os.getlogin()}/Appdata/Roaming")
-            ctypes.windll.user32.MessageBoxW(0, "A myDiscordhoz szükséges fájlok letöltődtek!\nKérlek nyisd meg újra a myDiscordot! (myDiscord.exe)", "Visszajelzés")
     except zipfile.BadZipfile:
         ctypes.windll.user32.MessageBoxW(0, "Nem sikerült letölteni a myDiscordhoz szükséges fájlokat", "Hiba")
 
@@ -33,16 +32,24 @@ skiplogin = False
 class Main(QtWidgets.QWidget):
 
     def kuldes(self):
+        global user
         now = datetime.now()
         dt_string = now.strftime("%Y.%m.%d. %H:%M:%S")
         uzenet = QtWidgets.QLabel()
-        uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
         uzenet.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         uzenet.setStyleSheet("color: white")
         uzenet.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        try:
+            uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
+        except NameError:
+            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "r")
+            sorok = f.readlines()
+            susn = sorok[1]
+            susn = susn[5:]
+            user = susn.replace("\n", "")
+            uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
         self.uzenetlyt.addWidget(uzenet)
         self.uzenetinput.setText("")
-
 
     def __init__(self):
         super().__init__()
@@ -64,10 +71,11 @@ class Main(QtWidgets.QWidget):
         self.left_layout = QtWidgets.QVBoxLayout()
         self.left_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
-        for i in range(3):
-            btn = QtWidgets.QPushButton(f"Option {i + 1}")
-            btn.setStyleSheet("color: white; background-color: #444444;")
-            self.left_layout.addWidget(btn)
+        self.settingsgomb = QtWidgets.QPushButton(f"Beállítások")
+        self.settingsgomb.setStyleSheet("color: white; background-color: #444444;")
+        self.settingsgomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+
+        self.left_layout.addWidget(self.settingsgomb)
 
         self.hbox_main = QtWidgets.QHBoxLayout()
 
@@ -109,7 +117,10 @@ class Bejelentkezes(QtWidgets.QWidget):
         self.m.show()
 
     def adatcheck(self):
-        global xn
+        global user
+
+        beirt_fhnev = self.fhnevinput2.text()
+        beirt_jszo = self.jszoinput2.text()
 
         if self.checkbox.isChecked():
             global skiplogin
@@ -117,12 +128,8 @@ class Bejelentkezes(QtWidgets.QWidget):
 
             os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt"), exist_ok=True)
             f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "w")
-            f.write(f"skiplogin: 1")
+            f.write(f"skiplogin: 1\nuser: {beirt_fhnev}")
             f.close()
-
-        global user
-        beirt_fhnev = self.fhnevinput2.text()
-        beirt_jszo = self.jszoinput2.text()
 
         sikeres = False
 
@@ -154,7 +161,6 @@ class Bejelentkezes(QtWidgets.QWidget):
             rpword = pword[::-1]
             rpword = rpword.replace("\n", "")
             if runame == beirt_fhnev and rpword == beirt_jszo:
-                xn = x
                 user = beirt_fhnev
                 self.foablak()
                 self.loginfeedbacklbl.setText("Sikeres bejelentkezés!")
@@ -497,7 +503,7 @@ class Fooldal(QtWidgets.QWidget):
         self.bejelentkezes_gomb.clicked.connect(self.loginablak)
         self.bejelentkezes_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
 
-        self.verzio = QtWidgets.QLabel("v.a.1.1.0")
+        self.verzio = QtWidgets.QLabel("v.a.1.1.1")
         self.verzio.setStyleSheet("color: white; margin-top: 125px")
         self.verzio.setFont(QtGui.QFont(betutipus_csalad[0], 10))
         self.verzio.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -514,13 +520,15 @@ class Fooldal(QtWidgets.QWidget):
         self.layout2.addWidget(self.bejelentkezes_gomb)
         self.layout.addWidget(self.verzio)
 
-        f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "r")
-        sorok = f.readlines()
-        print(sorok[0])
-        sorok[0] = sorok[0].replace("\n", "")
+        if os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt"):
+            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "r")
+            sorok = f.readlines()
+            print(sorok[0])
+            sorok[0] = sorok[0].replace("\n", "")
 
-        if str(sorok[0]) == "skiplogin: 1":
-            self.mainablak()
+            if str(sorok[0]) == "skiplogin: 1":
+                self.mainablak()
+                QtCore.QTimer.singleShot(0, self.close)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
