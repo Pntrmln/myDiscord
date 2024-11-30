@@ -6,10 +6,12 @@ import os
 import ctypes
 import requests
 from datetime import datetime
+import easygui
 
 def fajltorles():
     if os.path.exists("myDiscord.zip"):
         os.remove("myDiscord.zip")
+
 
 def unzip():
     try:
@@ -17,6 +19,7 @@ def unzip():
             zip_ref.extractall(f"C:/Users/{os.getlogin()}/Appdata/Roaming")
     except zipfile.BadZipfile:
         ctypes.windll.user32.MessageBoxW(0, "Nem sikerült letölteni a myDiscordhoz szükséges fájlokat", "Hiba")
+
 
 if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
     r = requests.get("https://c4227fda-4573-4d08-bf3b-07835e0f2723.filesusr.com/archives"
@@ -29,7 +32,107 @@ if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
 
 skiplogin = False
 
+class Beallitasok(QtWidgets.QWidget):
+
+    def usnchange(self):
+        try:
+            mappakszama = (len(next(os.walk(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users"))[1]))
+        except StopIteration:
+            mappakszama = 0
+
+        jelenlegi = easygui.enterbox("Add meg a jelenlegi felhasználóneved:")
+
+        for x in range(mappakszama):
+            fj = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{x}/userdata.txt", "r")
+            sorok = fj.readlines()
+            usn = sorok[0][4:]
+            nums = [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70]
+            username = ""
+            y = 0
+            while y != len(usn):
+                if y in nums:
+                    username += usn[y]
+                y += 1
+            username = username[::-1].replace("\n", "")
+            fj.close()
+
+            print(username)
+            print(jelenlegi)
+
+            if username == jelenlegi:
+                ujfhn = easygui.enterbox("Add meg az új felhasználóneved:")
+                usnlist = list(ujfhn)
+                encstr = usnlist[::-1]
+                fl_encstr = str(random.randint(0, 9))
+                spccharlist = ["#", "?", "!", ".", "/", "="]
+                fl = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{x}/userdata.txt", "r")
+                flsorok = fl.readlines()
+                full_encpss = flsorok[1].replace("\n", "")[5:]
+                for i in encstr:
+                    fl_encstr += i + str(random.randint(0, 9)) + random.choice(spccharlist)
+                fl.close()
+                fajl = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{x}/userdata.txt", "w")
+                fajl.write(f"usn:{fl_encstr}\npass:{full_encpss}")
+                fajl.close()
+
+                if skiplogin:
+                    sf = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "w")
+                    sf.write(f"skiplogin: 1\nuser: {ujfhn}")
+                    sf.close()
+
+                ctypes.windll.user32.MessageBoxW(0, "Az új felhasználónév életbe lépéséhez újra kell indítani a programot!", "Újraindítás szükséges")
+
+    def __init__(self):
+        super().__init__()
+
+        self.mainvbox = QtWidgets.QVBoxLayout(self)
+
+        self.felso_menusor_hbox = QtWidgets.QHBoxLayout(self)
+        self.felso_menusor_hbox.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+
+        self.felh_beall_gomb = QtWidgets.QPushButton("Felhasználói beállítások")
+        self.felh_beall_gomb.setStyleSheet("background-color: white")
+        self.felh_beall_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+
+
+        ############################### FELHASZNÁLÓI BEÁLLÍTÁSOK MENÜPONTJAI ###############################
+
+        self.felh_beall_vbox = QtWidgets.QVBoxLayout(self)
+
+        self.change_usnm_hbox = QtWidgets.QHBoxLayout(self)
+
+        self.change_usnm_lbl = QtWidgets.QLabel("Felhasználónév megváltoztatása:")
+        self.change_usnm_lbl.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.change_usnm_lbl.setStyleSheet("color: white")
+
+        self.change_usnm_btn = QtWidgets.QPushButton("Megváltoztatás")
+        self.change_usnm_btn.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.change_usnm_btn.setStyleSheet("background-color: white")
+        self.change_usnm_btn.clicked.connect(self.usnchange)
+
+        self.kijelentkezesgomb = QtWidgets.QPushButton("Kijelentkezés")
+        self.kijelentkezesgomb.setStyleSheet("background-color: red; color: white")
+        self.kijelentkezesgomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+
+        self.mainvbox.addLayout(self.felso_menusor_hbox)
+        self.felso_menusor_hbox.addWidget(self.felh_beall_gomb)
+        self.mainvbox.addLayout(self.felh_beall_vbox)
+        self.felh_beall_vbox.addLayout(self.change_usnm_hbox)
+        self.change_usnm_hbox.addWidget(self.change_usnm_lbl)
+        self.change_usnm_hbox.addWidget(self.change_usnm_btn)
+        self.felh_beall_vbox.addWidget(self.kijelentkezesgomb)
+
+        self.setWindowTitle("Beállítások")
+        self.setStyleSheet("background-color: #292929")
+        self.resize(500, 500)
+        self.show()
+
 class Main(QtWidgets.QWidget):
+
+    def konfigablak(self):
+        if self.b is None:
+            self.b = Beallitasok()
+        self.b.show()
 
     def kuldes(self):
         global user
@@ -48,6 +151,7 @@ class Main(QtWidgets.QWidget):
             susn = susn[5:]
             user = susn.replace("\n", "")
             uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
+            f.close()
         self.uzenetlyt.addWidget(uzenet)
         self.uzenetinput.setText("")
 
@@ -74,6 +178,8 @@ class Main(QtWidgets.QWidget):
         self.settingsgomb = QtWidgets.QPushButton(f"Beállítások")
         self.settingsgomb.setStyleSheet("color: white; background-color: #444444;")
         self.settingsgomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.settingsgomb.clicked.connect(self.konfigablak)
+
 
         self.left_layout.addWidget(self.settingsgomb)
 
@@ -109,6 +215,12 @@ class Main(QtWidgets.QWidget):
         self.setWindowTitle("myDiscord")
         self.show()
 
+        self.b = None
+
+    def keyPressEvent(self, event):
+        if event.key() in (QtCore.Qt.Key_Return, QtCore.Qt.Key_Enter):  # valamiért unresolved reference, de működik
+            self.kuldes()
+
 class Bejelentkezes(QtWidgets.QWidget):
 
     def foablak(self):
@@ -126,7 +238,8 @@ class Bejelentkezes(QtWidgets.QWidget):
             global skiplogin
             skiplogin = True
 
-            os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt"), exist_ok=True)
+            os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt"),
+                        exist_ok=True)
             f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "w")
             f.write(f"skiplogin: 1\nuser: {beirt_fhnev}")
             f.close()
@@ -134,7 +247,6 @@ class Bejelentkezes(QtWidgets.QWidget):
         sikeres = False
 
         mappakszama = (len(next(os.walk(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users"))[1]))
-
 
         for x in range(mappakszama):
             fj = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{x}/userdata.txt", "r")
@@ -169,7 +281,8 @@ class Bejelentkezes(QtWidgets.QWidget):
                 self.close()
             else:
                 if not sikeres:
-                    self.loginfeedbacklbl.setText("Sikertelen bejelentkezés!\nA felhasználónév vagy a jelszó nem egyezik!")
+                    self.loginfeedbacklbl.setText(
+                        "Sikertelen bejelentkezés!\nA felhasználónév vagy a jelszó nem egyezik!")
                     self.elrendezes.addWidget(self.loginfeedbacklbl)
 
     def __init__(self):
@@ -255,6 +368,7 @@ class Bejelentkezes(QtWidgets.QWidget):
 
 class Regisztracio(QtWidgets.QWidget):
     def reg_adattarolas(self):
+        global full_encpss
         username = self.fhnevinput.text()
         password = self.jszoinput.text()
 
@@ -293,22 +407,30 @@ class Regisztracio(QtWidgets.QWidget):
                         x += 1
                     runame = uname[::-1]
                     runame = runame.replace("\n", "")
+                    f.close()
                     if runame == username:
-                        self.regfeedbacklbl.setText("Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
+                        self.regfeedbacklbl.setText(
+                            "Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
                         self.elrendezes.addWidget(self.regfeedbacklbl)
                         egyezik = True
                     else:
                         if not egyezik:
                             os.makedirs(os.path.dirname(
-                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt"), exist_ok=True)
-                            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt", "w")
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt"),
+                                exist_ok=True)
+                            f = open(
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt",
+                                "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
                             self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
                             self.elrendezes.addWidget(self.regfeedbacklbl)
             else:
-                os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt"), exist_ok=True)
-                f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt", "w")
+                os.makedirs(os.path.dirname(
+                    f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt"),
+                            exist_ok=True)
+                f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_0{mappakszama}/userdata.txt",
+                         "w")
                 f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                 f.close()
                 self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
@@ -329,14 +451,20 @@ class Regisztracio(QtWidgets.QWidget):
                         x += 1
                     runame = uname[::-1]
                     runame = runame.replace("\n", "")
+                    f.close()
                     if runame == username:
-                        self.regfeedbacklbl.setText("Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
+                        self.regfeedbacklbl.setText(
+                            "Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
                         self.elrendezes.addWidget(self.regfeedbacklbl)
                         egyezik = True
                     else:
                         if not egyezik:
-                            os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt"), exist_ok=True)
-                            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt", "w")
+                            os.makedirs(os.path.dirname(
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt"),
+                                        exist_ok=True)
+                            f = open(
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt",
+                                "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
                             self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
@@ -355,14 +483,20 @@ class Regisztracio(QtWidgets.QWidget):
                         x += 1
                     runame = uname[::-1]
                     runame = runame.replace("\n", "")
+                    f.close()
                     if runame == username:
-                        self.regfeedbacklbl.setText("Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
+                        self.regfeedbacklbl.setText(
+                            "Sikertelen regisztráció!\nIlyen felhasználónévvel már található felhasználó.")
                         self.elrendezes.addWidget(self.regfeedbacklbl)
                         egyezik = True
                     else:
                         if not egyezik:
-                            os.makedirs(os.path.dirname(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt"), exist_ok=True)
-                            f = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt", "w")
+                            os.makedirs(os.path.dirname(
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt"),
+                                        exist_ok=True)
+                            f = open(
+                                f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users/USER_{mappakszama}/userdata.txt",
+                                "w")
                             f.write(f"usn:{full_encstr}\npass:{full_encpss}")
                             f.close()
                             self.regfeedbacklbl.setText("Sikeres regisztráció!\nMostmár bezárhatod az ablakot!")
@@ -473,7 +607,8 @@ class Fooldal(QtWidgets.QWidget):
 
         self.setStyleSheet("background-color: #292929")
 
-        betutipus = QtGui.QFontDatabase.addApplicationFont(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Fonts/AfacadFlux-Regular.ttf")
+        betutipus = QtGui.QFontDatabase.addApplicationFont(
+            f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Fonts/AfacadFlux-Regular.ttf")
 
         betutipus_csalad = QtGui.QFontDatabase.applicationFontFamilies(betutipus)
 
@@ -488,7 +623,8 @@ class Fooldal(QtWidgets.QWidget):
         self.udvozlo_szoveg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.udvozlo_szoveg.setStyleSheet("margin-bottom: 100px; color: white")
 
-        self.regisztralas_szoveg = QtWidgets.QLabel("Új felhasználó vagy?\nHa igen, akkor kérlek regisztrálj egy fiókot!\nHa nem, jelentkezz be!\n")
+        self.regisztralas_szoveg = QtWidgets.QLabel(
+            "Új felhasználó vagy?\nHa igen, akkor kérlek regisztrálj egy fiókot!\nHa nem, jelentkezz be!\n")
         self.regisztralas_szoveg.setFont(QtGui.QFont(betutipus_csalad[0], 14))
         self.regisztralas_szoveg.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.regisztralas_szoveg.setStyleSheet("color: white")
@@ -529,6 +665,8 @@ class Fooldal(QtWidgets.QWidget):
             if str(sorok[0]) == "skiplogin: 1":
                 self.mainablak()
                 QtCore.QTimer.singleShot(0, self.close)
+
+            f.close()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
