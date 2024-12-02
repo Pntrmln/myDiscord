@@ -12,7 +12,6 @@ def fajltorles():
     if os.path.exists("myDiscord.zip"):
         os.remove("myDiscord.zip")
 
-
 def unzip():
     try:
         with zipfile.ZipFile("myDiscord.zip", "r") as zip_ref:
@@ -33,7 +32,18 @@ if not os.path.exists(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord"):
 skiplogin = False
 
 class Beallitasok(QtWidgets.QWidget):
-
+    def logout(self):
+        global skiplogin
+        kijelentkezes = ctypes.windll.user32.MessageBoxW(0, "Biztosan ki szeretnél jelentkezni?", "Megerősítés", 4)
+        if kijelentkezes == 6:
+            skl = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "r")
+            if skl.readlines()[0].replace("\n", "") == "skiplogin: 1":
+                sf = open(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Settings/settings.txt", "w")
+                sf.write(f"skiplogin: 0")
+                sf.close()
+                skl.close()
+            skiplogin = False
+            os.execv(sys.executable, ['python'] + sys.argv) # A PROGRAM LEÁLLÁS UTÁN NEM INDUL ÚJRA - JAVÍTÁSRA VÁR
     def usnchange(self):
         try:
             mappakszama = (len(next(os.walk(f"C:/Users/{os.getlogin()}/Appdata/Roaming/myDiscord/Users"))[1]))
@@ -55,9 +65,6 @@ class Beallitasok(QtWidgets.QWidget):
                 y += 1
             username = username[::-1].replace("\n", "")
             fj.close()
-
-            print(username)
-            print(jelenlegi)
 
             if username == jelenlegi:
                 ujfhn = easygui.enterbox("Add meg az új felhasználóneved:")
@@ -113,6 +120,7 @@ class Beallitasok(QtWidgets.QWidget):
         self.kijelentkezesgomb = QtWidgets.QPushButton("Kijelentkezés")
         self.kijelentkezesgomb.setStyleSheet("background-color: red; color: white")
         self.kijelentkezesgomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
+        self.kijelentkezesgomb.clicked.connect(self.logout)
 
         self.mainvbox.addLayout(self.felso_menusor_hbox)
         self.felso_menusor_hbox.addWidget(self.felh_beall_gomb)
@@ -127,6 +135,9 @@ class Beallitasok(QtWidgets.QWidget):
         self.resize(500, 500)
         self.show()
 
+############################### ÚJ HIBA: Csak a második üzenetküldéstől látszanak az üzenetek ###############################
+############################### de csak akkor, ha skiplogin be van kapcsolva - javításra vár! ###############################
+
 class Main(QtWidgets.QWidget):
 
     def konfigablak(self):
@@ -136,6 +147,7 @@ class Main(QtWidgets.QWidget):
 
     def kuldes(self):
         global user
+
         now = datetime.now()
         dt_string = now.strftime("%Y.%m.%d. %H:%M:%S")
         uzenet = QtWidgets.QLabel()
@@ -150,10 +162,10 @@ class Main(QtWidgets.QWidget):
             susn = sorok[1]
             susn = susn[5:]
             user = susn.replace("\n", "")
-            uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
-            f.close()
+
         self.uzenetlyt.addWidget(uzenet)
         self.uzenetinput.setText("")
+
 
     def __init__(self):
         super().__init__()
