@@ -135,9 +135,6 @@ class Beallitasok(QtWidgets.QWidget):
         self.resize(500, 500)
         self.show()
 
-############################### ÚJ HIBA: Csak a második üzenetküldéstől látszanak az üzenetek ###############################
-############################### de csak akkor, ha skiplogin be van kapcsolva - javításra vár! ###############################
-
 class Main(QtWidgets.QWidget):
 
     def konfigablak(self):
@@ -162,6 +159,8 @@ class Main(QtWidgets.QWidget):
             susn = sorok[1]
             susn = susn[5:]
             user = susn.replace("\n", "")
+            uzenet.setText(f"{user} ({dt_string}):\n{self.uzenetinput.text()}")
+            f.close()
 
         self.uzenetlyt.addWidget(uzenet)
         self.uzenetinput.setText("")
@@ -651,7 +650,7 @@ class Fooldal(QtWidgets.QWidget):
         self.bejelentkezes_gomb.clicked.connect(self.loginablak)
         self.bejelentkezes_gomb.setFont(QtGui.QFont(betutipus_csalad[0], 12))
 
-        self.verzio = QtWidgets.QLabel("v.a.1.2.0")
+        self.verzio = QtWidgets.QLabel("v.a.1.2.1")
         self.verzio.setStyleSheet("color: white; margin-top: 125px")
         self.verzio.setFont(QtGui.QFont(betutipus_csalad[0], 10))
         self.verzio.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
